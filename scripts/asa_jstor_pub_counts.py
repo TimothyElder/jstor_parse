@@ -1,16 +1,20 @@
-'''
-This script takes the list of authors from the JSTOR corpus, standardizes names, creates counts of publications by author. Then taks the Faculty Names from the ASA data, standardizes the names, and creates a dataframe of publication counts using the dictionary created from the JSTOR data.
-'''
+# This script takes the list of authors from the JSTOR corpus, standardizes
+# names, creates counts of publications by author. Then taks the Faculty Names
+# from the ASA data, standardizes the names, and creates a dataframe of
+# publication counts using the dictionary created from the JSTOR data.
 
 import pandas as pd
 import re
 import os
 from Levenshtein import distance
+import sys
+sys.path.append('/Users/timothyelder/Documents/soc_of_soc/code')
 
 def cleanNewlineMeta(string):
-    '''
-    This function is for cleaning out extraneous newline (\n) metacharacters from strings
-    '''
+
+    # This function is for cleaning out extraneous newline (\n)
+    # metacharacters from strings
+
     pattern = r'\n+' #for cleaning out extraneous new line metacharachters
     replacement = ' ' #replacement string for above new line metacharachters
     clean_string = re.sub(pattern, replacement, string)
@@ -19,9 +23,8 @@ def cleanNewlineMeta(string):
 
 def sliceString(ListToSlice):
 
-    '''
-    This function is for splitting up a comma delimited list of lists which is converted into a string when saved as a CSV
-    '''
+    # This function is for splitting up a comma delimited list of lists which is
+    # converted into a string when saved as a CSV
 
     interests = ListToSlice
     pattern = r'\[|\]|\''
@@ -52,11 +55,12 @@ asa_names = faculty_df['faculty_name'].to_list()
 
 clean_asa_names = []
 
-'''
-For the ASA Network data, switching faculty name from "Last Name, First Name' to "First Name Last Name" for matching with the JSTOR data.
+
+# For the ASA Network data, switching faculty name from "Last Name, First Name'
+# to "First Name Last Name" for matching with the JSTOR data.
 
 Also fixing the common error from OCR which read 'l' as '/'.
-'''
+
 
 
 for i in asa_names:

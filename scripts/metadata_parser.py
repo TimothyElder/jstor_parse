@@ -1,15 +1,21 @@
-'''
-This script is for opening the archived zip files, loading text, and then parsing the XML files, pulling out the metadata of interest. It then creates a dataframe and saves it as a CSV. Where data is missing in the files I will insert NaN into the dataframe, which in later analyses can be treated as NA or replaced with another value. This script uses absolute file locations rather than relative ones.
-'''
-import time #for timing how long the script lastss
-start_time = time.time() #creates start time variable for knowing how long the script takes to execute
-import zipfile #library for extracting data from zipped archives
+# This script is for opening the archived zip files, loading text, and then
+# parsing the XML files, pulling out the metadata of interest. It then creates
+# a dataframe and saves it as a CSV. Where data is missing in the files I will
+# insert NaN into the dataframe, which in later analyses can be treated as NA
+# or replaced with another value. This script uses absolute file locations
+# rather than relative ones.
+
+import time                     # for timing how long the script lastss
+start_time = time.time()        # creates start time variable for knowing how long the script takes to execute
+import zipfile                  # library for extracting data from zipped archives
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
-import re # regex
+import re                       # regex
 import os
-import lxml # xml parser for Bs4
+import lxml                     # xml parser for Bs4
+
+# Functions
 
 def cleanNewlineMeta(string):
     '''
@@ -34,7 +40,7 @@ def cleanNgram(string):
 
 pattern = '\/(journal\-article\-(.+)\.)'   #regex for pulling out DOI from file name.
 
-# lists for appending data from metadata files to
+# Lists for appending data from metadata files to
 doi = []
 file_sub_name = []
 file_name = []
