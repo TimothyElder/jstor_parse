@@ -1,4 +1,4 @@
-# A new set of helper functions, the follow up to my Silenus module.
+# A set of helper functions, the follow up to my Silenus module.
 
 def cleanNewlineMeta(string):
     '''

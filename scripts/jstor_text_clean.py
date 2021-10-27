@@ -1,3 +1,9 @@
+# This script opens all the files in the zipped 
+# archives, stems, lems and normalizes before 
+# returning a really large CSV file of all the cleaned 
+# text. Includes a few lines of code for getting how
+# long the script takes to run. 
+
 import time
 start_time = time.time()
 from nltk.corpus import stopwords
@@ -56,4 +62,4 @@ normalized_tokens_POS)), columns =[
 
 print("Code took", (time.time() - start_time)/60, "minutes to execute")
 
-df.to_csv("/home/timothyelder/jstor_parse/dataframes/jstor_standard_text.csv", index = False)
+df.to_csv("/home/timothyelder/jstor_parse/data/jstor_standard_text.csv", index = False)

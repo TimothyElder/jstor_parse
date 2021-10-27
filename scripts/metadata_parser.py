@@ -1,45 +1,24 @@
-# This script is for opening the archived zip files, loading text, and then
-# parsing the XML files, pulling out the metadata of interest. It then creates
-# a dataframe and saves it as a CSV. Where data is missing in the files I will
-# insert NaN into the dataframe, which in later analyses can be treated as NA
-# or replaced with another value. This script uses absolute file locations
+# This script is for opening the archived zip files, 
+# loading text, and then parsing the XML files, pulling 
+# out the metadata of interest. It then creates a 
+# dataframe and saves it as a CSV. Where data is missing 
+# in the files I will insert NaN into the dataframe, which 
+# in later analyses can be treated as NA or replaced with 
+# another value. This script uses absolute file locations
 # rather than relative ones.
 
-import time                     # for timing how long the script lastss
-start_time = time.time()        # creates start time variable for knowing how long the script takes to execute
-import zipfile                  # library for extracting data from zipped archives
-from bs4 import BeautifulSoup
-import pandas as pd
-import numpy as np
-import re                       # regex
+import re                      
 import os
-import lxml                     # xml parser for Bs4
+import lxml 
+import time
+import bacchus  
+import zipfile 
+import numpy as np
+import pandas as pd
+from bs4 import BeautifulSoup
 
-# Functions
-
-def cleanNewlineMeta(string):
-    '''
-    This function is for cleaning out extraneous newline (\n) metacharacters from strings
-    '''
-    pattern = r'\n+' #for cleaning out extraneous new line metacharachters
-    replacement = ' ' #replacement string for above new line metacharachters
-    clean_string = re.sub(pattern, replacement, string)
-
-    return clean_string
-
-def cleanNgram(string):
-    '''
-    Cleans file name strings to get the DOI number. The DOI will be the principal means of identifying the file data.
-    '''
-    pattern = r'\-.+' #for cleaning out extraneous new line metacharachters
-    replacement = '' #replacement string for above new line metacharachters
-    new_string = string.replace('_', '/', 1)
-    clean_string = re.sub(pattern, replacement, new_string)
-
-    return clean_string
-
-pattern = '\/(journal\-article\-(.+)\.)'   #regex for pulling out DOI from file name.
-
+start_time = time.time()        
+                 
 # Lists for appending data from metadata files to
 doi = []
 file_sub_name = []
@@ -54,7 +33,7 @@ abstract = []
 list_of_authors = []
 list_of_affiliations = []
 
-#zip_location = '/Volumes/timothyelder/Downloads/receipt-id-2158941-part-016.zip'
+
 # For  file in the Downloads directoty
 for i in os.listdir('/home/timothyelder/Downloads'):
 
@@ -80,7 +59,6 @@ for i in os.listdir('/home/timothyelder/Downloads'):
                     match = re.search(pattern, j)
 
                     doi.append(cleanNgram(match.group(2))) # get the DOI number
-                    file_sub_name.append(match.group(1)) # get the subname of the file
 
                     # Load zip file
                     my_zip = zf.open(j, mode = 'r')
@@ -90,13 +68,21 @@ for i in os.listdir('/home/timothyelder/Downloads'):
 
                     # Parse with beautifulsoup
                     soup = BeautifulSoup(file_text, 'html')
-                    temp_author_list = [] # temporary list for list of authors in the file text
-                    temp_affiliation_list = [] # temporary list for list of author affiliations in the file text
+                    
+                    # temporary list for list of authors in the file text
+                    temp_author_list = [] 
+                    
+                    # temporary list for list of author affiliations in the file text
+                    temp_affiliation_list = [] 
 
                     # for author in the list of authors
                     for m in soup.find_all('contrib'):
-                        temp_author_list.append(cleanNewlineMeta(m.text)) # append author to temporary list of authors
-                    list_of_authors.append(temp_author_list) #append list of authors to main list of authors
+                        
+                        # append author to temporary list of authors
+                        temp_author_list.append(cleanNewlineMeta(m.text))
+                        
+                        #append list of authors to main list of authors
+                    list_of_authors.append(temp_author_list) 
 
                     # year_published
                     if soup.find('pub-date') == None:
@@ -133,8 +119,12 @@ for i in os.listdir('/home/timothyelder/Downloads'):
                         list_of_affiliations.append(np.NaN)
                     else:
                         for l in soup.find_all('aff'):
-                            temp_affiliation_list.append(l.text) # append affiliation to temporary list of affiliations
-                        list_of_affiliations.append(temp_affiliation_list) # append list of author's affiliations to main list of author affiliations
+                            
+                            # append affiliation to temporary list of affiliations
+                            temp_affiliation_list.append(l.text) 
+                            
+                         # append list of author's affiliations to main list of author affiliations
+                        list_of_affiliations.append(temp_affiliation_list)
 
                     # abstracts
                     if soup.find('abstract') == None:
@@ -143,32 +133,18 @@ for i in os.listdir('/home/timothyelder/Downloads'):
                         abstract.append(soup.find('abstract').text)
 
 
+
+# packing the lists into a dataframe
+df = pd.DataFrame(list(zip(file_name, doi, list_of_authors, list_of_affiliations, 
+                           year_published, article_subject, article_title, 
+                           journal_name, journal_id, abstract)), 
+                           columns = ["file_name", "doi", "contributors", "affiliation",
+                                     "year_published", "article_subject", 
+                                     "article_title", "journal_name", "journal_id", 
+                                      "abstract"])
+
+df.to_csv("/home/timothyelder/jstor_parse/data/metadata.csv", index = False)
+
 print("My program took", time.time() - start_time, "seconds to run.")
 
 print("That is", (time.time() - start_time)/60, "minutes")
-
-# packing the lists into a dataframe
-df = pd.DataFrame(list(zip(file_name,
-doi,
-file_sub_name,
-list_of_authors,
-list_of_affiliations,
-year_published,
-article_subject,
-article_title,
-journal_name,
-journal_id,
-abstract)), columns =[
-"file_name",
-"doi",
-"file_sub_name",
-"contributors",
-"affiliation",
-"year_published",
-"article_subject",
-"article_title",
-"journal_name",
-"journal_id",
-"abstract"])
-
-df.to_csv("/home/timothyelder/jstor_parse/dataframes/jstor_metadata.csv", index = False)

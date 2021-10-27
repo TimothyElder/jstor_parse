@@ -48,22 +48,12 @@ pattern = r'(.+\,)(.+)' # regex for matching the first name and last name
 aux_pattern = '(\S+)(.+)' # extra pattern for when the above doesn't match
 
 #load complete faculty df from the ASA Guides
-faculty_df = pd.read_csv("/home/timothyelder/jstor_parse/faculty_df_complete.csv")
+faculty_df = pd.read_csv("/home/timothyelder/jstor_parse/data/faculty_df_complete.csv")
 
-#get names to list
-asa_names = faculty_df['faculty_name'].to_list()
+faculty_names = faculty_df['faculty_name'].to_list()
+asa_names = faculty_names
 
-clean_asa_names = []
-
-
-# For the ASA Network data, switching faculty name from "Last Name, First Name'
-# to "First Name Last Name" for matching with the JSTOR data.
-
-Also fixing the common error from OCR which read 'l' as '/'.
-
-
-
-for i in asa_names:
+for idx,i in enumerate(faculty_names):
     i = re.sub(r';|:', ',', i)
     # match regex to the file_name string
     if re.search(pattern, i) == None:
@@ -74,7 +64,7 @@ for i in asa_names:
         new_name = new_name.lower()
         new_name = new_name.strip()
 
-        clean_asa_names.append(new_name)
+        faculty_names[idx] = new_name
 
     else:
         # match regex to the file_name string
@@ -86,7 +76,8 @@ for i in asa_names:
         new_name = new_name.lower()
         new_name = new_name.strip()
 
-        clean_asa_names.append(new_name)
+    new_name = re.sub('\.', '', new_name)
+    faculty_names[idx] = new_name
 
 # empty dictionary for creating counts of publications by authors
 pubCounts = {}
@@ -116,6 +107,8 @@ for idx, i in enumerate(clean_jstor_authors):
         else:
             # otherwise, create key with 1 count value
             pubCounts[clean] = 1
+            
+
 
 # dataframe for ASA guide names
 df = pd.DataFrame(list(zip(asa_names, clean_asa_names)),
